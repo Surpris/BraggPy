@@ -11,7 +11,7 @@ def generate_momentum(hv, qmax, dq=0.01, **kwargs):
         qmax: max of the target momentum (unit of angstrom)
         dq: step width
         kwargs: options
-    
+
     < Output >
         dict object including the following parameters
             qxx, qyy, qzz: target momentum coordinates

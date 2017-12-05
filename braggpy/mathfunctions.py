@@ -10,14 +10,14 @@ def make_lattice_points(a=1.0, lattice_type="sc", ind_min=-10, ind_max=10, CAR=N
         fcc: face-centered cubic
         bcc: body-centered cubic
         hcp: hexagonal close-packed
-    
+
     <Input>
         a: lattice constant (default: 1.0)
         lattice_type: type of lattice (default: "sc")
         ind_min: Min of Miller's index (default: -10)
         ind_max: Max of Miller's index (default: +10)
-        CAR: C-to-A ratio for hcp (default: None=2.0\sqrt{2.0/3.0})
-        
+        CAR: C-to-A ratio for hcp (default: None=2.0 \\sqrt{2.0/3.0})
+
     <Output>
         coordinates of lattice points
     """
@@ -37,7 +37,8 @@ def make_lattice_points(a=1.0, lattice_type="sc", ind_min=-10, ind_max=10, CAR=N
         a3 = np.array([0.5, -0.5, 0.5])
     elif lattice_type == "hcp":
         if CAR is None:
-            CAR = 2.0 * np.sqrt(2.0 / 3.0) # c-to-a ratio = 2.0 * np.sqrt(2.0 / 3.0) for ideal lattice
+            # c-to-a ratio = 2.0 * np.sqrt(2.0 / 3.0) for ideal lattice
+            CAR = 2.0 * np.sqrt(2.0 / 3.0)
         a1 = np.array([1.0, 0., 0.])
         a2 = np.array([-0.5, 0.5*np.sqrt(3.0), 0.])
         a3 = np.array([0.0, 0.0, CAR])
@@ -52,7 +53,7 @@ def make_lattice_points(a=1.0, lattice_type="sc", ind_min=-10, ind_max=10, CAR=N
     k = np.reshape(k, (k.size, 1))
     l = np.reshape(l, (l.size, 1))
 
-    hkl = np.hstack((np.hstack((h, k)),l))
+    hkl = np.hstack((np.hstack((h, k)), l))
 
     # Calculation
     if lattice_type != "hcp":
@@ -61,74 +62,96 @@ def make_lattice_points(a=1.0, lattice_type="sc", ind_min=-10, ind_max=10, CAR=N
     else:
         A = np.vstack((np.vstack((a1, a2)), a3)) # lattice
         A_coor = a * np.dot(hkl, A)
-        B_coor = np.zeros((2*len(A_coor), 3))
+        B_coor = np.zeros((2 * len(A_coor), 3))
         B_coor[::2] = A_coor
-        B = 2./3.*a1 +  1./3.*a2 + 0.5*a3 # the other atom in the basis
+        B = 2./3. * a1 +  1./3. * a2 + 0.5 * a3 # the other atom in the basis
         B_coor[1::2] = A_coor + a * np.tile(B[None, :], (len(A_coor), 1))
         return B_coor.copy()
 
-def EulerRotation(Coor, EulerAngle=[0,0,0], mode=0):
+def euler_rotate(coor, euler_angle, mode=0):
     """
     Rotate the input coordinates by a set of Euler angles.
 
     < Input >
-        Coor: coordinates to rotate (3-N or N-3 numpy.2darray)
-        EulerAngle: a set of Euler angles (length of 3)
+        coor: coordinates to rotate (3-N or N-3 numpy.2darray)
+        euler_angle: a set of Euler angles (length of 3)
         mode: 0=normal rotation, 1=inverse rotation
-    
+
     < Output >
         rotated coordinates
     """
     # Check the validity of coordinate.
-    try: h = Coor.shape[0]
-    except: h = 1
-    try: w = Coor.shape[1]
-    except: w = 1
-    if w != 3 and h != 3:
+    if len(coor.shape) != 2:
+        raise ValueError("'coor' must have exactly 2 dimensions.")
+    height, width = coor.shape
+    if width != 3 and height != 3:
         raise Exception('Coordinate must be 3-dimensional.')
 
-    l = len(EulerAngle)
-    if l is not 3:
-        raise Exception('Coordinate must be 3-dimensional.')
-    if EulerAngle[0] == 0 and EulerAngle[1] == 0 and EulerAngle[2] == 0:
-        return Coor
+    length_euler = len(euler_angle)
+    if length_euler != 3:
+        raise ValueError("'euler_angle' must have exactly 3 elements.")
+    if euler_angle[0] == 0 and euler_angle[1] == 0 and euler_angle[2] == 0:
+        return coor.copy()
 
     # Substitute Euler angles.
-    alpha = EulerAngle[0]*np.pi/180
-    beta = EulerAngle[1]*np.pi/180
-    gamma = EulerAngle[2]*np.pi/180
+    alpha = euler_angle[0]*np.pi/180
+    beta = euler_angle[1]*np.pi/180
+    gamma = euler_angle[2]*np.pi/180
 
     # mode 0 : normal rotation, 1 : inverse rotation.
     if mode is None:
         # First rotation with respect to z0 axis.
-        Euler_z0_ori = np.array([[np.cos(alpha), np.sin(alpha), 0],
-            [-np.sin(alpha), np.cos(alpha), 0],
-            [0, 0, 1]])
+        euler_z0 = np.array([[np.cos(alpha), np.sin(alpha), 0],
+                             [-np.sin(alpha), np.cos(alpha), 0],
+                             [0, 0, 1]])
         # Second rotation with respect to x1 axis.
-        Euler_x1_ori = np.array([[1, 0, 0],
-            [0, np.cos(beta), np.sin(beta)],
-            [0, -np.sin(beta), np.cos(beta)]])
+        euler_x1 = np.array([[1, 0, 0],
+                             [0, np.cos(beta), np.sin(beta)],
+                             [0, -np.sin(beta), np.cos(beta)]])
         # Third rotation with respect to z2 axis.
-        Euler_z2_ori = np.array([[np.cos(gamma), np.sin(gamma), 0],
-            [-np.sin(gamma), np.cos(gamma), 0],
-            [0, 0, 1]])
-        Euler_all = np.dot(Euler_z2_ori,np.dot(Euler_x1_ori,Euler_z0_ori))
+        euler_z2 = np.array([[np.cos(gamma), np.sin(gamma), 0],
+                             [-np.sin(gamma), np.cos(gamma), 0],
+                             [0, 0, 1]])
+        euler_all = np.dot(euler_z2, np.dot(euler_x1, euler_z0))
     else:
-        Euler_z0_inv = np.array([[np.cos(alpha), -np.sin(alpha), 0],
-            [np.sin(alpha), np.cos(alpha), 0],
-            [0, 0, 1]])
-        Euler_x1_inv = np.array([[1, 0, 0],
-            [0, np.cos(beta), -np.sin(beta)],
-            [0, np.sin(beta), np.cos(beta)]])
-        Euler_z2_inv = np.array([[np.cos(gamma), -np.sin(gamma), 0],
-            [np.sin(gamma), np.cos(gamma), 0],
-            [0, 0, 1]])
-        Euler_all = np.dot(Euler_z0_inv,np.dot(Euler_x1_inv,Euler_z2_inv))
+        euler_z0 = np.array([[np.cos(alpha), -np.sin(alpha), 0],
+                             [np.sin(alpha), np.cos(alpha), 0],
+                             [0, 0, 1]])
+        euler_x1 = np.array([[1, 0, 0],
+                             [0, np.cos(beta), -np.sin(beta)],
+                             [0, np.sin(beta), np.cos(beta)]])
+        euler_z2 = np.array([[np.cos(gamma), -np.sin(gamma), 0],
+                             [np.sin(gamma), np.cos(gamma), 0],
+                             [0, 0, 1]])
+        euler_all = np.dot(euler_z0, np.dot(euler_x1, euler_z2))
 
     # Reshaping for output : (N, 3) np.array.
-    if h == 3:
-        out = np.dot(Euler_all,Coor)
+    if height == 3:
+        out = np.dot(euler_all, coor)
     else:
-        out = np.dot(Euler_all,np.transpose(Coor))
+        out = np.dot(euler_all, np.transpose(coor))
         out = np.transpose(out)
     return out
+
+def calc_euler_hkl(a, k0, h, k, l):
+    """
+    return euler angle $(\alpha, \beta, 0)$
+    where an intense spot from the (hkl) plane can appear.
+
+    < Input >
+        a    : lattice constant
+        k0   : wave number of incident photon
+        h,k,l: Miller indices
+
+    < Output >
+        euler angle (\alpha, \beta, 0)
+    """
+    q0 = 2.*np.pi / a
+    theta = 2. * np.arcsin(q0 * (h**2 + k**2 + l**2)**0.5 / 2.0 / k0)
+    phi = np.arctan2(l, k)
+    dkx = k0 * np.sin(theta)
+    dkz = k0 * np.cos(theta) - k0
+
+    alpha = np.arccos(h * q0 / dkx)
+    beta = np.arcsin(dkz / (k**2 + l**2)**0.5 / q0) - phi
+    return np.array([alpha, beta, 0.0])
