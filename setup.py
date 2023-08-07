@@ -12,7 +12,7 @@ setup(
     license='Apache-2.0 License',
     packages=find_packages(),
     install_requires=[
-        'requests',
+        'numpy',
     ],
     classifiers=[
         'Development Status :: 3 - Alpha',
