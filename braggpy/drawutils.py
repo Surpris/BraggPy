@@ -4,6 +4,7 @@ import os.path as path
 import numpy as np
 import matplotlib.pyplot as plt
 
+
 def make_figure(width=6, height=5, dpi=100, fignum=None):
     """
     make a figure
@@ -13,6 +14,7 @@ def make_figure(width=6, height=5, dpi=100, fignum=None):
     else:
         fig = plt.figure(fignum, figsize=(width, height), dpi=dpi)
     return fig
+
 
 def plot_modulus(F, figsize=None, **kwargs):
     """
@@ -25,6 +27,7 @@ def plot_modulus(F, figsize=None, **kwargs):
         kwargs["aspect"] = "auto"
     plt.imshow(np.abs(F), **kwargs)
     return fig
+
 
 def arrange_figure(xlabel=None, ylabel=None, title=None,
                    ticks_fontsize=14, label_fontsize=14,
@@ -47,6 +50,7 @@ def arrange_figure(xlabel=None, ylabel=None, title=None,
                  linestyle='-', color='0.75')
     plt.gca().set_axisbelow(True)
 
+
 def save_figure(filepath, bbox_inches="tight", pad_inches=0.0, overwrite=True, dpi=100):
     """
     save the current figure
@@ -57,5 +61,7 @@ def save_figure(filepath, bbox_inches="tight", pad_inches=0.0, overwrite=True, d
         while path.exists(filepath):
             _ext = _filepath.split('.')[-1]
             save_count += 1
-            _filepath = _filepath.replace('.'+_ext, '_save_{0:04d}.{1}'.format(save_count, _ext))
-    plt.savefig(_filepath, bbox_inches=bbox_inches, pad_inches=pad_inches, dpi=dpi)
+            _filepath = _filepath.replace(
+                '.'+_ext, '_save_{0:04d}.{1}'.format(save_count, _ext))
+    plt.savefig(_filepath, bbox_inches=bbox_inches,
+                pad_inches=pad_inches, dpi=dpi)

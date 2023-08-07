@@ -2,6 +2,7 @@
 
 import numpy as np
 
+
 def make_lattice_points(a=1.0, lattice_type="sc", ind_min=-10, ind_max=10, CAR=None):
     """
     Calculate coordinates of each lattice point.
@@ -57,16 +58,17 @@ def make_lattice_points(a=1.0, lattice_type="sc", ind_min=-10, ind_max=10, CAR=N
 
     # Calculation
     if lattice_type != "hcp":
-        A = np.vstack((np.vstack((a1, a2)), a3)) # lattice
+        A = np.vstack((np.vstack((a1, a2)), a3))  # lattice
         return a * np.dot(hkl, A)
     else:
-        A = np.vstack((np.vstack((a1, a2)), a3)) # lattice
+        A = np.vstack((np.vstack((a1, a2)), a3))  # lattice
         A_coor = a * np.dot(hkl, A)
         B_coor = np.zeros((2 * len(A_coor), 3))
         B_coor[::2] = A_coor
-        B = 2./3. * a1 +  1./3. * a2 + 0.5 * a3 # the other atom in the basis
+        B = 2./3. * a1 + 1./3. * a2 + 0.5 * a3  # the other atom in the basis
         B_coor[1::2] = A_coor + a * np.tile(B[None, :], (len(A_coor), 1))
         return B_coor.copy()
+
 
 def euler_rotate(coor, euler_angle, mode=0):
     """
@@ -132,6 +134,7 @@ def euler_rotate(coor, euler_angle, mode=0):
         out = np.dot(euler_all, np.transpose(coor))
         out = np.transpose(out)
     return out
+
 
 def calc_euler_hkl(a, k0, h, k, l):
     """

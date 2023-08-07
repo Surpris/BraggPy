@@ -1,10 +1,14 @@
-# -*- coding: utf-8 -*-
+"""utils.py
+"""
 
-def elapsed(elapse):
+
+def elapsed(elapse: float):
     """
     utility function to print elapsed time
-    
-    < Input >
-        elapse: elapsed time
+
+    Parameters
+    ----------
+    elapse : float
+        elapsed time.
     """
-    print('Elapsed time: {0:.2f} sec.'.format(elapse))
+    print(f'Elapsed time: {elapse:.2f} sec.')
