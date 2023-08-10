@@ -158,3 +158,24 @@ def calc_euler_hkl(a, k0, h, k, l):
     alpha = np.arccos(h * q0 / dkx)
     beta = np.arcsin(dkz / (k**2 + l**2)**0.5 / q0) - phi
     return np.array([alpha, beta, 0.0])
+
+
+def calculate_lattice_distance(
+    lattice_constant: float,
+    miller_h: int, miller_k: int, miller_l: int
+) -> float:
+    """
+    calculate the lattice distance of the (hkl) planes.
+
+    Parameters
+    ----------
+    lattice_constant : float
+        lattice constant.
+    h,k,l : int
+        Miller indices.
+
+    Returns
+    -------
+    lattice distance (float).
+    """
+    return lattice_constant / np.linalg.norm([miller_h, miller_k, miller_l])
