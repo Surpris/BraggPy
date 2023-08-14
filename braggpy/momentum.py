@@ -29,9 +29,12 @@ def generate_momentum(hv, qmax, dq=0.01, **kwargs):
     qxx, qyy = np.meshgrid(qrange, qrange)
     qzz = np.sqrt(k0**2 - qxx**2 - qyy**2) - k0
 
-    res = {"qxx": qxx, "qyy": qyy, "qzz": qzz,
-           "wavelength": wavelength, "qmin": -qmax, "qmax": qmax,
-           "dqx": dq, "dqy": dq}
+    res = {
+        "qxx": qxx, "qyy": qyy, "qzz": qzz,
+        "wavelength": wavelength, "k0": k0,
+        "qmin": -qmax, "qmax": qmax,
+        "dqx": dq, "dqy": dq
+    }
     return res
 
 
@@ -68,7 +71,10 @@ def generate_momentum_polar(hv, qmax, dq=0.01, dphi=1.0, qmin=0.0, **kwargs):
     qxx, qyy = qrr*np.cos(pphi), qrr*np.sin(pphi)
     qzz = np.sqrt(k0**2 - qrr**2) - k0
 
-    res = {"qxx": qxx, "qyy": qyy, "qzz": qzz,
-           "wavelength": wavelength, "qmin": qmin, "qmax": qmax,
-           "dq": dq, "dphi": dphi}
+    res = {
+        "qxx": qxx, "qyy": qyy, "qzz": qzz,
+        "wavelength": wavelength, "k0": k0,
+        "qmin": qmin, "qmax": qmax,
+        "dq": dq, "dphi": dphi
+    }
     return res
