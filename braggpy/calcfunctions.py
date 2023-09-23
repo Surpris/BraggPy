@@ -64,18 +64,17 @@ def calc_modulus_mulptiroccess(
     qzz : numpy.ndarrry
         momentum coordinates in the Z axis (same as the incident X-ray beam).
     """
-    n_coors = len(coors)
-    n_coors_per_worker = n_coors // n_workers
+    n_coors_per_worker = len(coors) // n_workers
     dst = numpy.zeros(qxx.shape, dtype=complex)
     with concurrent.futures.ProcessPoolExecutor(max_workers=n_workers) as executor:
         futures = []
         for index in range(n_workers - 1):
             futures.append(executor.submit(
-                n_coors[index * n_coors_per_worker:(index + 1) * n_coors_per_worker],
+                coors[index * n_coors_per_worker:(index + 1) * n_coors_per_worker],
                 qxx, qyy, qzz
             ))
         futures.append(executor.submit(
-            n_coors[(n_workers - 1) * n_coors_per_worker:],
+            coors[(n_workers - 1) * n_coors_per_worker:],
             qxx, qyy, qzz
         ))
         for future_ in concurrent.futures.as_completed(futures):
