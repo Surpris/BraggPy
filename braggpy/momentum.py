@@ -25,7 +25,7 @@ def generate_momentum(photon_energy: float, qmax: float, q_step: float = 0.01) -
         qxx, qyy, qzz: target momentum coordinates
         wavelength: wavelength of incident photon
         qmin, qmax: min / max of the target momentum
-        q_stepx, q_stepy: step width in qx / qy direction
+        q_step_x, q_step_y: step width in qx / qy directions
     """
     wavelength = 12.3849 / photon_energy  # photon_energy = 12.3849 [keV * A] / wavelength [A]
     k_0 = 2. * np.pi / wavelength  # [1/A]
@@ -42,7 +42,7 @@ def generate_momentum(photon_energy: float, qmax: float, q_step: float = 0.01) -
         "qxx": qxx, "qyy": qyy, "qzz": qzz,
         "wavelength": wavelength, "k_0": k_0,
         "qmin": -qmax, "qmax": qmax,
-        "q_stepx": q_step, "q_stepy": q_step
+        "q_step_x": q_step, "q_step_y": q_step
     }
     return res
 
