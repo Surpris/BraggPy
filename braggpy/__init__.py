@@ -1,7 +1,7 @@
 """braggpy.py
 """
 
-from .calcfunctions import calc_modulus
+from .calcfunctions import calc_modulus, calc_modulus_mulptiroccess
 from .drawutils import make_figure, plot_modulus, save_figure, arrange_figure
 from .in_out_shape import (
     is_outside_sphere, is_outside_sphere_index,
