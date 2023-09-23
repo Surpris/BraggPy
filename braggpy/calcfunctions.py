@@ -70,10 +70,12 @@ def calc_modulus_mulptiroccess(
         futures = []
         for index in range(n_workers - 1):
             futures.append(executor.submit(
+                calc_modulus,
                 coors[index * n_coors_per_worker:(index + 1) * n_coors_per_worker],
                 qxx, qyy, qzz
             ))
         futures.append(executor.submit(
+            calc_modulus,
             coors[(n_workers - 1) * n_coors_per_worker:],
             qxx, qyy, qzz
         ))
