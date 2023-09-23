@@ -1,9 +1,13 @@
-# -*- coding: utf-8 -*-
+"""mathfunctions.py
+"""
 
 import numpy as np
 
 
-def make_lattice_points(a=1.0, lattice_type="sc", ind_min=-10, ind_max=10, CAR=None):
+def make_lattice_points(
+    lattice_constant: float = 1.0, lattice_type: str = "sc",
+    ind_min: int = -10, ind_max: int = 10, car: float = None
+) -> np.ndarray:
     """
     Calculate coordinates of each lattice point.
     The implemented lattices are followings:
@@ -12,15 +16,22 @@ def make_lattice_points(a=1.0, lattice_type="sc", ind_min=-10, ind_max=10, CAR=N
         bcc: body-centered cubic
         hcp: hexagonal close-packed
 
-    <Input>
-        a: lattice constant (default: 1.0)
-        lattice_type: type of lattice (default: "sc")
-        ind_min: Min of Miller's index (default: -10)
-        ind_max: Max of Miller's index (default: +10)
-        CAR: C-to-A ratio for hcp (default: None=2.0 \\sqrt{2.0/3.0})
+    Parameters
+    ----------
+    lattice_constant : float (default: 1.0)
+        lattice constant.
+    lattice_type : str (default: "sc")
+        lattice type.
+    ind_min : int (default: -10)
+        minimum of Miller's index.
+    ind_max : int (default: +10)
+        maximum of Miller's index.
+    car : float (default: None = 2.0 / \\sqrt{2.0/3.0})
+        C-to-A ratio for hcp.
 
-    <Output>
-        coordinates of lattice points
+    Returns
+    -------
+    numpy.ndarry : coordinates of lattice points.
     """
 
     # Generate basis vectors
@@ -37,14 +48,14 @@ def make_lattice_points(a=1.0, lattice_type="sc", ind_min=-10, ind_max=10, CAR=N
         a2 = np.array([-0.5, 0.5, 0.5])
         a3 = np.array([0.5, -0.5, 0.5])
     elif lattice_type == "hcp":
-        if CAR is None:
+        if car is None:
             # c-to-a ratio = 2.0 * np.sqrt(2.0 / 3.0) for ideal lattice
-            CAR = 2.0 * np.sqrt(2.0 / 3.0)
+            car = 2.0 * np.sqrt(2.0 / 3.0)
         a1 = np.array([1.0, 0., 0.])
         a2 = np.array([-0.5, 0.5*np.sqrt(3.0), 0.])
-        a3 = np.array([0.0, 0.0, CAR])
+        a3 = np.array([0.0, 0.0, car])
     else:
-        raise ValueError("Invalid lattice_type: ", lattice_type)
+        raise ValueError(f"Invalid lattice_type: {lattice_type}.")
 
     # Generate pairs of Miller indices
     ind_list = np.arange(ind_min, ind_max + 1, 1)
@@ -57,37 +68,42 @@ def make_lattice_points(a=1.0, lattice_type="sc", ind_min=-10, ind_max=10, CAR=N
     hkl = np.hstack((np.hstack((h, k)), l))
 
     # Calculation
-    if lattice_type != "hcp":
+    if lattice_type == "hcp":
         A = np.vstack((np.vstack((a1, a2)), a3))  # lattice
-        return a * np.dot(hkl, A)
-    else:
-        A = np.vstack((np.vstack((a1, a2)), a3))  # lattice
-        A_coor = a * np.dot(hkl, A)
+        A_coor = lattice_constant * np.dot(hkl, A)
         B_coor = np.zeros((2 * len(A_coor), 3))
         B_coor[::2] = A_coor
         B = 2./3. * a1 + 1./3. * a2 + 0.5 * a3  # the other atom in the basis
-        B_coor[1::2] = A_coor + a * np.tile(B[None, :], (len(A_coor), 1))
+        B_coor[1::2] = A_coor + lattice_constant * np.tile(B[None, :], (len(A_coor), 1))
         return B_coor.copy()
 
+    A = np.vstack((np.vstack((a1, a2)), a3))  # lattice
+    return lattice_constant * np.dot(hkl, A)    
 
-def euler_rotate(coor, euler_angle, mode=0):
+
+def euler_rotate(coor: np.ndarray, euler_angle: list, mode: int = 0) -> np.ndarray:
     """
     Rotate the input coordinates by a set of Euler angles.
 
-    < Input >
-        coor: coordinates to rotate (3-N or N-3 numpy.2darray)
-        euler_angle: a set of Euler angles (length of 3)
-        mode: 0=normal rotation, 1=inverse rotation
+    Parameters
+    ----------
+    coor : numpy.ndarray (3xN or Nx3)
+        coordinates to rotate.
+    euler_angle : array-liky (length of 3)
+        a set of Euler angles.
+    mode : int (0 ot 1)
+        0 = normal rotation, 1 = inverse rotation.
 
-    < Output >
-        rotated coordinates
+    Returns
+    -------
+    numpy.ndarray : rotated coordinates.
     """
     # Check the validity of coordinate.
     if len(coor.shape) != 2:
         raise ValueError("'coor' must have exactly 2 dimensions.")
     height, width = coor.shape
     if width != 3 and height != 3:
-        raise Exception('Coordinate must be 3-dimensional.')
+        raise ValueError('Coordinate must be 3-dimensional.')
 
     length_euler = len(euler_angle)
     if length_euler != 3:
@@ -96,12 +112,12 @@ def euler_rotate(coor, euler_angle, mode=0):
         return coor.copy()
 
     # Substitute Euler angles.
-    alpha = euler_angle[0]*np.pi/180
-    beta = euler_angle[1]*np.pi/180
-    gamma = euler_angle[2]*np.pi/180
+    alpha = euler_angle[0] * np.pi / 180
+    beta = euler_angle[1] * np.pi / 180
+    gamma = euler_angle[2] * np.pi / 180
 
     # mode 0 : normal rotation, 1 : inverse rotation.
-    if mode is None:
+    if mode == 0:
         # First rotation with respect to z0 axis.
         euler_z0 = np.array([[np.cos(alpha), np.sin(alpha), 0],
                              [-np.sin(alpha), np.cos(alpha), 0],
@@ -129,35 +145,10 @@ def euler_rotate(coor, euler_angle, mode=0):
 
     # Reshaping for output : (N, 3) np.array.
     if height == 3:
-        out = np.dot(euler_all, coor)
-    else:
-        out = np.dot(euler_all, np.transpose(coor))
-        out = np.transpose(out)
-    return out
+        return np.dot(euler_all, coor)
 
-
-def calc_euler_hkl(a, k0, h, k, l):
-    """
-    return euler angle $(\alpha, \beta, 0)$
-    where an intense spot from the (hkl) plane can appear.
-
-    < Input >
-        a    : lattice constant
-        k0   : wave number of incident photon
-        h,k,l: Miller indices
-
-    < Output >
-        euler angle (\alpha, \beta, 0)
-    """
-    q0 = 2.*np.pi / a
-    theta = 2. * np.arcsin(q0 * (h**2 + k**2 + l**2)**0.5 / 2.0 / k0)
-    phi = np.arctan2(l, k)
-    dkx = k0 * np.sin(theta)
-    dkz = k0 * np.cos(theta) - k0
-
-    alpha = np.arccos(h * q0 / dkx)
-    beta = np.arcsin(dkz / (k**2 + l**2)**0.5 / q0) - phi
-    return np.array([alpha, beta, 0.0])
+    out = np.dot(euler_all, np.transpose(coor))
+    return np.transpose(out)
 
 
 def calculate_lattice_distance(
@@ -179,3 +170,32 @@ def calculate_lattice_distance(
     lattice distance (float).
     """
     return lattice_constant / np.linalg.norm([miller_h, miller_k, miller_l])
+
+
+def calc_euler_hkl(
+    lattice_constant: float, k_0: float,
+    h: int, k: int, l: int
+) -> np.ndarray:
+    """
+    return euler angle $(\alpha, \beta, 0)$
+    where an intense spot from the (hkl) plane can appear.
+
+    Parameters
+    ----------
+        lattice_constant : lattice constant
+        k_0   : wave number of incident photon
+        h,k,l: Miller indices
+
+    Returns
+    -------
+    euler angle (\alpha, \beta, 0)
+    """
+    q_0 = 2.*np.pi / lattice_constant
+    theta = 2. * np.arcsin(q_0 * (h**2 + k**2 + l**2)**0.5 / 2.0 / k_0)
+    phi = np.arctan2(l, k)
+    dkx = k_0 * np.sin(theta)
+    dkz = k_0 * np.cos(theta) - k_0
+
+    alpha = np.arccos(h * q_0 / dkx)
+    beta = np.arcsin(dkz / (k**2 + l**2)**0.5 / q_0) - phi
+    return np.array([alpha, beta, 0.0])
