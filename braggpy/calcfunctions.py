@@ -70,8 +70,8 @@ def calc_modulus(
     -------
     numpy.ndarray : the Fourier modulus.
     """
-    assert isinstance(n_woeker, int), TypeError('`n_worker` must be an integer.')
-    assert n_worker >= 1, ValueError('`n_worker` must be >= 1.')
+    assert isinstance(n_workers, int), TypeError('`n_worker` must be an integer.')
+    assert n_workers >= 1, ValueError('`n_worker` must be >= 1.')
 
     if n_workers == 1:
         return _calc_modulus(coors, qxx, qyy, qzz)
